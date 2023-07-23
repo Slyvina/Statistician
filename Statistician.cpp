@@ -21,6 +21,8 @@ namespace Slyvina {
 		uint64 _Party::_cnt{0};
 		uint64 _Char::_cnt{0};
 		uint64 _Stat::_cnt{0};
+		uint64 _Data::_cnt{0};
+		uint64 _Point::_cnt{0};
 
 		Slyvina::Statistician::_Party::_Party() {
 			_id = _cnt++;
@@ -169,25 +171,66 @@ namespace Slyvina {
 			if (modifier == "BASE")  Statistic(sid)->Base = v;
 			(*Statistic(sid))[modifier] = v;
 		}
-		void _Char::LinkStat( std::string sourcestat, std::string targetchar, std::string targetstat) {
+		void _Char::LinkStat(std::string sourcestat, std::string targetchar, std::string targetstat) {
 			auto src{ this };
 			auto tgt{ Parent->Ch(targetchar) };
 			//Trans2Upper(sourcestat);
 			Trans2Upper(targetstat);
-			tgt->_Stats[sourcestat] = Statistic(sourcestat);
+			tgt->_Stats[targetstat] = Statistic(sourcestat);
 		}
 		void _Char::LinkStat(std::string sourcestat, std::string targetchar) { LinkStat(sourcestat, targetchar, sourcestat); }
 		void _Char::KillStat(std::string stat) {
 			Trans2Upper(stat);
 			if (_Stats.count(stat)) _Stats.erase(stat);
 		}
+		Point _Char::GetPoints(std::string sid) {
+			Trans2Upper(sid);
+			if (!_Points.count(sid)) {
+				auto ret = new _Point(this);
+				_Points[sid] = std::shared_ptr<_Point>(ret);
+			}
+			return _Points[sid];
+		}
+
+		bool _Char::HavePoints(std::string sid) {
+			Trans2Upper(sid);
+			return _Points.count(sid);
+		}
+
+		void _Char::Points(std::string sid, int32 v, int32 max) {
+			auto p{ GetPoints(sid) };
+			*p = v;
+			p->Max(max);
+		}
+
+		void _Char::LinkPoints(std::string sourcestat, std::string targetchar, std::string targetstat) {
+			//Trans2Upper(sourcestat);
+			Trans2Upper(targetstat);
+			auto src{ this };
+			auto tgt{ Parent->Ch(targetchar) };
+			auto pnt{ GetPoints(sourcestat) };
+			_Points[targetstat] = pnt;
+			if (pnt->MaxCopy.size()) LinkStat(pnt->MaxCopy, targetchar);
+			if (pnt->MinCopy.size()) LinkStat(pnt->MinCopy, targetchar);
+		}
+
+		void _Char::LinkPoints(std::string sourcestat, std::string targetchar) { LinkPoints(sourcestat, targetchar, sourcestat); }
+
+		ChData _Char::GetData(std::string key) {
+			Trans2Upper(key);
+			if (!_DataMap.count(key)) {
+				_DataMap[key] = std::shared_ptr<_Data>(new _Data(this));
+			}
+			return _DataMap[key];
+		}
+
 		int32 _Point::Max() {
 			if (MaxCopy.size()) _maxi = Parent->Stats(MaxCopy);
 			return _maxi;
 		}
 		int32 _Point::Min() {
 			if (MinCopy.size()) _mini = Parent->Stats(MinCopy);
-			return _mini;			
+			return _mini;
 		}
 
 		void _Point::Have(int32 v) {
@@ -201,7 +244,58 @@ namespace Slyvina {
 		}
 		void _Point::Max(int32 m) { _maxi = std::max(m, Min()); }
 		void _Point::Min(int32 m) { _mini = m; _maxi = std::max(m, _maxi); }
-		
+
+		std::string& __IdData::operator[](std::string key) {
+			return Parent->GetData(key)->Value;
 		}
+
+		void _Char::LinkData(std::string sourceData, std::string targetchar, std::string targetData) {
+			auto src{ this };
+			auto tgt{ Parent->Ch(targetchar) };
+			//Trans2Upper(sourceData);
+			Trans2Upper(targetData);
+			tgt->_DataMap[targetData] = GetData(sourceData);
+		}
+		void _Char::LinkData(std::string sourceData, std::string targetchar) { LinkData(sourceData, targetchar, sourceData); }
+
+		List _Char::GetList(std::string key) {
+			Trans2Upper(key);
+			if (!_Lijsten.count(key)) {
+				_Lijsten[key] = shared_ptr<_List>(new _List(this));
+			}
+			return _Lijsten[key];
+		}
+		std::string& _List::Spot(size_t i) {
+			if (i >= _Lijst.size()) throw std::runtime_error(TrSPrintF("List index out of bounds (%d/%d)", i, _Lijst.size()));
+			return _Lijst[i];
+		}
+		void _List::Remove(std::string item, bool all) {
+			bool first{ true };
+			vector<string> Temp{};
+			for (auto _it : _Lijst) {
+				if (!(_it == item && (all || first))) {
+					first = false;
+				} else Temp.push_back(_it);
+			}
+			_Lijst = Temp;
+		}
+		void _List::Remove(size_t idx) {
+			vector<string> Temp{};
+			for (size_t i = 0; i < _Lijst.size(); i++)
+				if (i != idx) Temp.push_back(_Lijst[i]);
+			_Lijst = Temp;
+		}
+
+		void _Char::LinkList(std::string sourceLijst, std::string targetchar, std::string targetLijst) {
+			auto src{ this };
+			auto tgt{ Parent->Ch(targetchar) };
+			//Trans2Upper(sourceLijst);
+			Trans2Upper(targetLijst);
+			tgt->_Lijsten[targetLijst] = GetList(sourceLijst);
+		}
+
+		void _Char::LinkList(std::string sourceLijst, std::string targetchar) { LinkList(sourceLijst, targetchar, sourceLijst); }
+
+	}
 }
-}
+
