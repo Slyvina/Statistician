@@ -108,7 +108,7 @@ namespace Slyvina {
 			// Points
 			Point GetPoints(std::string sid);
 			bool HavePoints(std::string sid);
-			inline void Points(std::string sid, int32 v) { GetPoints(sid)->Have(v); }
+			void Points(std::string sid, int32 v);
 			void Points(std::string sid, int32 v, int32 max);
 
 			void LinkPoints(std::string sourcestat, std::string targetchar, std::string targetstat);
@@ -123,8 +123,8 @@ namespace Slyvina {
 
 			// List
 			List GetList(std::string key);
-			inline void ListAdd(std::string key, std::string item) { *GetList(key) += item; }
-			inline std::string& ListItem(std::string key, size_t idx) { return (*GetList(key))[idx]; }
+			void ListAdd(std::string key, std::string item);
+			std::string& ListItem(std::string key, size_t idx);
 			void LinkList(std::string sourcestat, std::string targetchar, std::string targetstat);
 			void LinkList(std::string sourcestat, std::string targetchar);
 
@@ -183,8 +183,8 @@ namespace Slyvina {
 			inline bool operator==(const int32 v) { return Have() == v; }
 			inline bool operator>(const int32 v) { return Have() > v; }
 			inline bool operator<(const int32 v) { return Have() < v; }
-			inline bool operator>(const int32 v) { return Have() >= v; }
-			inline bool operator<(const int32 v) { return Have() <= v; }
+			inline bool operator>=(const int32 v) { return Have() >= v; }
+			inline bool operator<=(const int32 v) { return Have() <= v; }
 			inline void operator=(const int32 v) { Have(v); }
 			inline int32 operator+(const int32 v) { return Have() + v; }
 			inline int32 operator-(const int32 v) { return Have() - v; }

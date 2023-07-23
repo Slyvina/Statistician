@@ -41,6 +41,7 @@ namespace Slyvina {
 		uint64 _Char::_cnt{0};
 		uint64 _Stat::_cnt{0};
 		uint64 _Data::_cnt{0};
+		uint64 _List::_cnt{0};
 		uint64 _Point::_cnt{0};
 
 		Slyvina::Statistician::_Party::_Party() {
@@ -216,6 +217,8 @@ namespace Slyvina {
 			return _Points.count(sid);
 		}
 
+		void _Char::Points(std::string sid, int32 v) { GetPoints(sid)->Have(v); }
+
 		void _Char::Points(std::string sid, int32 v, int32 max) {
 			auto p{ GetPoints(sid) };
 			*p = v;
@@ -284,6 +287,10 @@ namespace Slyvina {
 			}
 			return _Lijsten[key];
 		}
+		void _Char::ListAdd(std::string key, std::string item) { *GetList(key) += item; }
+
+		std::string& _Char::ListItem(std::string key, size_t idx) { return (*GetList(key))[idx]; }
+
 		std::string& _List::Spot(size_t i) {
 			if (i >= _Lijst.size()) throw std::runtime_error(TrSPrintF("List index out of bounds (%d/%d)", i, _Lijst.size()));
 			return _Lijst[i];
