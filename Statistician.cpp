@@ -1,7 +1,7 @@
 // Lic:
 // Statistician/Statistician.cpp
 // Statistician
-// version: 23.07.23
+// version: 23.07.26
 // Copyright (C) 2023 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -147,6 +147,11 @@ namespace Slyvina {
 			Remove(ch, false); // 2nd MUST always be false or an infinite loop WILL form freezing the program!
 			_Characters.erase(ch);
 		}
+		Slyvina::VecString _Party::CharList() {
+			auto ret{ NewVecString() };
+			for (auto& ICH : _Characters) ret->push_back(ICH.first);
+			return ret;
+		}
 		int64& _Stat::operator[](std::string modid) {
 			Trans2Upper(modid);
 			return Modifiers[modid];
@@ -159,6 +164,13 @@ namespace Slyvina {
 			}
 			if (usemini) ret = std::max(minimum, ret);
 			if (usemaxi) ret = std::min(maximum, ret);
+			return ret;
+		}
+
+		VecString _Stat::ListModifiers() {
+			auto ret{ NewVecString() };
+			for (auto& ID : Modifiers) ret->push_back(ID.first);
+			return ret;
 		}
 
 		_Stat::_Stat(_Char* Ouwe) {
@@ -203,6 +215,14 @@ namespace Slyvina {
 			Trans2Upper(stat);
 			if (_Stats.count(stat)) _Stats.erase(stat);
 		}
+		Slyvina::Int64 _Char::TStat(std::string key) {
+			return Statistic(key)->Total();
+		}
+		Slyvina::VecString _Char::StatList() {
+			auto ret{ NewVecString() };
+			for (auto& SI : _Stats) ret->push_back(SI.first);
+			return ret;
+		}
 		Point _Char::GetPoints(std::string sid) {
 			Trans2Upper(sid);
 			if (!_Points.count(sid)) {
@@ -238,6 +258,12 @@ namespace Slyvina {
 
 		void _Char::LinkPoints(std::string sourcestat, std::string targetchar) { LinkPoints(sourcestat, targetchar, sourcestat); }
 
+		VecString _Char::PointsList() {
+			auto ret{ NewVecString() };
+			for (auto& ID : _Points) ret->push_back(ID.first);
+			return ret;
+		}
+
 		ChData _Char::GetData(std::string key) {
 			Trans2Upper(key);
 			if (!_DataMap.count(key)) {
@@ -246,26 +272,26 @@ namespace Slyvina {
 			return _DataMap[key];
 		}
 
-		int32 _Point::Max() {
+		int64 _Point::Max() {
 			if (MaxCopy.size()) _maxi = Parent->Stats(MaxCopy);
 			return _maxi;
 		}
-		int32 _Point::Min() {
+		int64 _Point::Min() {
 			if (MinCopy.size()) _mini = Parent->Stats(MinCopy);
 			return _mini;
 		}
 
-		void _Point::Have(int32 v) {
+		void _Point::Have(int64 v) {
 			_have = std::min(v, Max());
 			_have = std::max(_have, Min());
 		}
-		int32 _Point::Have() {
+		int64 _Point::Have() {
 			_have = std::min(_have, Max());
 			_have = std::max(_have, Min());
 			return _have;
 		}
-		void _Point::Max(int32 m) { _maxi = std::max(m, Min()); }
-		void _Point::Min(int32 m) { _mini = m; _maxi = std::max(m, _maxi); }
+		void _Point::Max(int64 m) { _maxi = std::max(m, Min()); }
+		void _Point::Min(int64 m) { _mini = m; _maxi = std::max(m, _maxi); }
 
 		std::string& __IdData::operator[](std::string key) {
 			return Parent->GetData(key)->Value;
@@ -279,6 +305,13 @@ namespace Slyvina {
 			tgt->_DataMap[targetData] = GetData(sourceData);
 		}
 		void _Char::LinkData(std::string sourceData, std::string targetchar) { LinkData(sourceData, targetchar, sourceData); }
+
+		VecString _Char::DataList() {
+			auto ret{ NewVecString() };
+			for (auto ID : _DataMap) ret->push_back(ID.first);
+			return ret;
+
+		}
 
 		List _Char::GetList(std::string key) {
 			Trans2Upper(key);
@@ -322,5 +355,20 @@ namespace Slyvina {
 
 		void _Char::LinkList(std::string sourceLijst, std::string targetchar) { LinkList(sourceLijst, targetchar, sourceLijst); }
 
-	}
+		VecString _Char::ListList() {
+			auto ret{ NewVecString() };
+			for (auto& ID : _Lijsten) ret->push_back(ID.first);
+			return ret;
+		}
+
+		size_t _Char::ListSize(std::string key) {
+			return GetList(key)->GetList()->size();
+
+		}
+
+		int64& __IdBStat::operator[](std::string key) {
+			return Parent->Statistic(key)->Base;
+		}
+
+}
 }

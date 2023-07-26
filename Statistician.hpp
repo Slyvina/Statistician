@@ -1,7 +1,7 @@
 // Lic:
 // Statistician/Statistician.hpp
 // Statistician (header)
-// version: 23.07.23
+// version: 23.07.26
 // Copyright (C) 2023 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -60,6 +60,7 @@ namespace Slyvina {
 			void Remove(uint32 idx, bool _kill = false);
 			void Remove(std::string ch, bool _kill = false);
 			void Kill(std::string ch);
+			Slyvina::VecString CharList();
 		};
 
 		// NEVER use directly. This is only a quick access class.
@@ -67,9 +68,18 @@ namespace Slyvina {
 		private:
 			_Char* Parent;
 		public:
-			__IdData() {}
-			__IdData(_Char* P) { Parent = P; }
+			inline __IdData() {}
+			inline __IdData(_Char* P) { Parent = P; }
 			std::string& operator[](std::string key);
+		};
+
+		class __IdBStat {
+		private:
+			_Char* Parent;
+		public:
+			inline __IdBStat() {}
+			inline __IdBStat(_Char* P) { Parent = P; }
+			Slyvina::int64& operator[](std::string key);
 		};
 
 		class _Char {
@@ -104,6 +114,9 @@ namespace Slyvina {
 			void LinkStat(std::string sourcestat, std::string targetchar, std::string targetstat);
 			void LinkStat(std::string sourcestat, std::string targetchar);
 			void KillStat(std::string stat);
+			__IdBStat BStat{ this };
+			Slyvina::Int64 TStat(std::string key);
+			Slyvina::VecString StatList();
 
 			// Points
 			Point GetPoints(std::string sid);
@@ -113,6 +126,7 @@ namespace Slyvina {
 
 			void LinkPoints(std::string sourcestat, std::string targetchar, std::string targetstat);
 			void LinkPoints(std::string sourcestat, std::string targetchar);
+			VecString PointsList();
 
 			// Data
 			__IdData Data{ this };
@@ -120,6 +134,7 @@ namespace Slyvina {
 
 			void LinkData(std::string sourcestat, std::string targetchar, std::string targetstat);
 			void LinkData(std::string sourcestat, std::string targetchar);
+			VecString DataList();
 
 			// List
 			List GetList(std::string key);
@@ -127,6 +142,9 @@ namespace Slyvina {
 			std::string& ListItem(std::string key, size_t idx);
 			void LinkList(std::string sourcestat, std::string targetchar, std::string targetstat);
 			void LinkList(std::string sourcestat, std::string targetchar);
+			VecString ListList();
+			size_t ListSize(std::string key);
+		
 
 		};
 
@@ -143,6 +161,7 @@ namespace Slyvina {
 			bool usemaxi{ false };
 		public:
 			inline uint64 ID() { return _id; }
+			inline _Char* GetCharacter() { return Parent; }
 			StatScript StatScriptFunction;
 			std::string StatScriptScript;
 			int64 Base{ 0 };
@@ -152,7 +171,10 @@ namespace Slyvina {
 			inline int64 Maxi() { return maximum; }
 			inline void Mini(uint64 v) { minimum = v; maximum = std::max(minimum, maximum); usemini = true; }
 			inline void Maxi(uint64 v) { maximum = v; minimum = std::min(minimum, maximum); usemaxi = true; }
-			inline void KillMinMax() { minimum = 0; maximum = 0; usemini = false; usemaxi = false; }			
+			inline bool UseMini() { return usemini; }
+			inline bool UseMaxi() { return usemini; }
+			inline void KillMinMax() { minimum = 0; maximum = 0; usemini = false; usemaxi = false; }
+			VecString ListModifiers();
 			_Stat(_Char* Ouwe);
 		};
 
@@ -161,7 +183,7 @@ namespace Slyvina {
 			static uint64 _cnt;
 			uint64 _id{ _cnt++ };
 			_Char* Parent;
-			int32
+			int64
 				_mini{ 0 },
 				_maxi{ 0 },
 				_have{ 0 };
@@ -170,24 +192,24 @@ namespace Slyvina {
 			_Point(_Char* Ouwe) {Parent = Ouwe; }
 			std::string MaxCopy{""};
 			std::string MinCopy{""};
-			void Max(int32 m);
-			void Min(int32 m);
-			void Have(int32 v);
-			int32 Max();
-			int32 Min();
-			int32 Have();
-			inline void Inc(int32 v = 1) { Have(Have() + v); }
-			inline void Dec(int32 v = 1) { Have(Have() - v); }
-			inline void operator+=(int32 v) { Inc(v); }
-			inline void operator-=(int32 v) { Dec(v); }
-			inline bool operator==(const int32 v) { return Have() == v; }
-			inline bool operator>(const int32 v) { return Have() > v; }
-			inline bool operator<(const int32 v) { return Have() < v; }
-			inline bool operator>=(const int32 v) { return Have() >= v; }
-			inline bool operator<=(const int32 v) { return Have() <= v; }
-			inline void operator=(const int32 v) { Have(v); }
-			inline int32 operator+(const int32 v) { return Have() + v; }
-			inline int32 operator-(const int32 v) { return Have() - v; }
+			void Max(int64 m);
+			void Min(int64 m);
+			void Have(int64 v);
+			int64 Max();
+			int64 Min();
+			int64 Have();
+			inline void Inc(int64 v = 1) { Have(Have() + v); }
+			inline void Dec(int64 v = 1) { Have(Have() - v); }
+			inline void operator+=(int64 v) { Inc(v); }
+			inline void operator-=(int64 v) { Dec(v); }
+			inline bool operator==(const int64 v) { return Have() == v; }
+			inline bool operator>(const int64 v) { return Have() > v; }
+			inline bool operator<(const int64 v) { return Have() < v; }
+			inline bool operator>=(const int64 v) { return Have() >= v; }
+			inline bool operator<=(const int64 v) { return Have() <= v; }
+			inline void operator=(const int64 v) { Have(v); }
+			inline int64 operator+(const int64 v) { return Have() + v; }
+			inline int64 operator-(const int64 v) { return Have() - v; }
 		};
 
 
@@ -219,5 +241,8 @@ namespace Slyvina {
 			void Remove(std::string item, bool all = false);
 			void Remove(size_t idx);
 		};
+
+		inline Party CreateParty() { return std::shared_ptr<_Party>(new _Party()); }
+		inline UParty CreateUniqueParty() { return std::unique_ptr<_Party>(new _Party()); }
 	}
 }
