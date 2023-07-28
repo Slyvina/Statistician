@@ -1,7 +1,7 @@
 // Lic:
 // Statistician/Statistician_SaveJCR6.cpp
 // Statistician - Save to JCR6
-// version: 23.07.26
+// version: 23.07.28
 // Copyright (C) 2023 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
