@@ -1,7 +1,7 @@
 // Lic:
 // Statistician/Statistician.hpp
 // Statistician (header)
-// version: 23.07.26
+// version: 23.07.31
 // Copyright (C) 2023 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
