@@ -169,8 +169,8 @@ namespace Slyvina {
 			int64 Total();
 			inline int64 Mini() { return minimum; }
 			inline int64 Maxi() { return maximum; }
-			inline void Mini(uint64 v) { minimum = v; maximum = std::max(minimum, maximum); usemini = true; }
-			inline void Maxi(uint64 v) { maximum = v; minimum = std::min(minimum, maximum); usemaxi = true; }
+			inline void Mini(int64 v) { minimum = v; maximum = std::max(minimum, maximum); usemini = true; }
+			inline void Maxi(int64 v) { maximum = v; minimum = std::min(minimum, maximum); usemaxi = true; }
 			inline bool UseMini() { return usemini; }
 			inline bool UseMaxi() { return usemini; }
 			inline void KillMinMax() { minimum = 0; maximum = 0; usemini = false; usemaxi = false; }
