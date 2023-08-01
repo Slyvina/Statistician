@@ -1,7 +1,7 @@
 // Lic:
 // Statistician/Statistician_LoadJCR6.cpp
 // Statician - Load from JCR6
-// version: 23.07.31
+// version: 23.08.01
 // Copyright (C) 2023 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -58,6 +58,7 @@ namespace Slyvina {
 						std::string STID{""};
 						Stat StD{ nullptr };
 						while (GetB(BT, STag)) {
+							//printf("DEBUG> Stat tag: %d @%x\n", STag, (int)BT->Position() - 1);
 							switch (STag) {
 							case 0:
 								// Should never happen, but just in case!
@@ -84,18 +85,20 @@ namespace Slyvina {
 									auto ModTag{ BT->ReadString() };
 									(*StD)[ModTag] = BT->ReadInt64();
 								}
+								break;
 							case 7:
 								switch (StatFunctionResponse) {
 								case JCR6_Response::Ignore: break;
 								case JCR6_Response::Warn: std::cout << "\07\x1b[31mWARNING!\x1b[0m\tFunction tied to stat, but that could not be loaded\n"; break;
 								case JCR6_Response::Throw: throw std::runtime_error("Function tied to stat, but that could not be loaded");
 								}
+								break;
 							case 8:
 								SCHK(STID, "Stat");
 								StD->StatScriptScript = BT->ReadString();
 								break;
 							default:
-								throw std::runtime_error(TrSPrintF("Unknown statistic command tag in character %s (%d)! Either the statistic data is corrupted or meant for a higher version of Statistician.",ChT.c_str(),STag));
+								throw std::runtime_error(TrSPrintF("Unknown statistic command tag in character %s (%d @%x)! Either the statistic data is corrupted or meant for a higher version of Statistician.",ChT.c_str(),STag,(int)BT->Position()-1));
 							}
 						}
 					} break;
@@ -152,15 +155,18 @@ namespace Slyvina {
 						}
 					} break;
 					default:
-						throw std::runtime_error(TrSPrintF("Unknown tag in data for character %s (%d). Either the character data is corrupted or you loaded a file for a later version of Statician.",ChT.c_str(),MTag));
+						throw std::runtime_error(TrSPrintF("Unknown main command tag for character %s (%d). Either the character data is corrupted or you loaded a file for a later version of Statician.",ChT.c_str(),MTag));
 					}
-				} ChEindLoop:
+				} ChEindLoop:;
 				
 			}
 			// Party (should be after loading characters to prevent conflicts)
 			auto BT = J->B(dir + "Party");
-			P->Size(BT->ReadUInt32());
-			for (uint32 i = 0; i < P->Size(); i++) P->AddToParty(BT->ReadString());
+			auto ps{ BT->ReadUInt32() };
+			if (ps) {
+				P->Size(ps);
+				for (uint32 i = 0; i < P->Size(); i++) P->AddToParty(BT->ReadString());
+			}
 
 
 			// TODO: Load links and apply them

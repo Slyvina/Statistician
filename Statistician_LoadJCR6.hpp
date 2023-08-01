@@ -34,7 +34,7 @@ namespace Slyvina {
 
 		Party JCR6_LoadParty(JCR6::JT_Dir J, std::string dir = "");
 		Party JCR6_LoadParty(std::string J, std::string dir = "");
-		Party JCR6_LoadUParty(JCR6::JT_Dir J, std::string dir = "");
-		Party JCR6_LoadUParty(std::string J, std::string dir = "");
+		UParty JCR6_LoadUParty(JCR6::JT_Dir J, std::string dir = "");
+		UParty JCR6_LoadUParty(std::string J, std::string dir = "");
 	}
 }
