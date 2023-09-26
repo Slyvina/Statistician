@@ -1,7 +1,7 @@
 // Lic:
 // Statistician/Statistician.hpp
 // Statistician (header)
-// version: 23.07.31
+// version: 23.09.26
 // Copyright (C) 2023 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -53,8 +53,8 @@ namespace Slyvina {
 			Character NewChar(bool, std::string, std::string = "");
 			inline Character NewChar(std::string a, std::string b = "") { return NewChar(false, a, b); }
 			void AddToParty(std::string cid, bool ignorewhenfull = true);
-			std::string PIndex(uint32 idx);
-			inline std::string operator[](uint32 idx) { return PIndex(idx); }
+			std::string& PIndex(uint32 idx);
+			inline std::string& operator[](uint32 idx) { return PIndex(idx); }
 			inline Character operator[](std::string chid) { return Ch(chid); }
 			void FindInParty(bool& success, uint32& idx, std::string ch);
 			void Remove(uint32 idx, bool _kill = false);

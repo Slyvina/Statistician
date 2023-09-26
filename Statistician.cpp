@@ -1,7 +1,7 @@
 // Lic:
 // Statistician/Statistician.cpp
 // Statistician
-// version: 23.07.26
+// version: 23.09.26
 // Copyright (C) 2023 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -107,7 +107,7 @@ namespace Slyvina {
 			Warn("Max party length exceeded");
 			if (!ignorewhenfull) throw std::runtime_error("Max party length exceeded");
 		}
-		std::string _Party::PIndex(uint32 idx) {
+		std::string& _Party::PIndex(uint32 idx) {
 			if (idx >= _PSize) throw runtime_error(TrSPrintF("Party index out of bounds (%d/%d)", idx, _PSize));
 			return _PartyArray[idx];
 		}
