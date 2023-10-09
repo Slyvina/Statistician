@@ -1,7 +1,7 @@
 // Lic:
 // Statistician/Statistician.cpp
 // Statistician
-// version: 23.09.26
+// version: 23.10.08
 // Copyright (C) 2023 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -22,14 +22,15 @@
 
 #include "Statistician.hpp"
 
-#define STAT_DEBUG
+#undef STAT_DEBUG
 
 #ifdef STAT_DEBUG
 #include <iostream>
-#define Chat(ABC) std::cout << "\x1b[32mDEBUG>\x1b[0m; " << ABC <<"\n"
-#define Warn(ABC) std::cout << "\x1b[31mWARNING>\x1b[0m; " << ABC <<"\n"
+#define Chat(ABC) std::cout << "\x1b[32mDEBUG>\x1b[0m " << ABC <<"\n"
+#define Warn(ABC) std::cout << "\x1b[31mWARNING>\x1b[0m " << ABC <<"\n"
 #else
-#define Chat()
+#define Chat(ABC)
+#define Warn(ABC)
 #endif
 
 using namespace std;
@@ -64,6 +65,7 @@ namespace Slyvina {
 				}
 				delete[] OParty;
 			}
+			_PSize = s;
 		}
 
 		uint32 _Party::PartyMembers() {
