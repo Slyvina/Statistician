@@ -1,7 +1,7 @@
 // Lic:
 // Statistician/Statistician.cpp
 // Statistician
-// version: 23.10.08
+// version: 23.11.01
 // Copyright (C) 2023 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -162,7 +162,7 @@ namespace Slyvina {
 			if (StatScriptFunction) StatScriptFunction(this, StatScriptScript);
 			auto ret{ Base };
 			for (auto& k : Modifiers) {
-				Base += k.second;
+				ret += k.second;
 			}
 			if (usemini) ret = std::max(minimum, ret);
 			if (usemaxi) ret = std::min(maximum, ret);
