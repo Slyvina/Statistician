@@ -1,7 +1,7 @@
 // Lic:
 // Statistician/Statistician_SaveJCR6.cpp
 // Statistician - Save to JCR6
-// version: 23.07.28
+// version: 23.11.21
 // Copyright (C) 2023 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -51,12 +51,17 @@ namespace Slyvina {
 						JCS->WriteByte(1); JCS->Write(STID);
 						JCS->WriteByte(2); JCS->Write(ST->Base);
 
-					JCS->WriteByte(4); JCS->Write((byte)ST->UseMini()); if (ST->UseMini()) JCS->Write(ST->Mini());
-					JCS->WriteByte(5); JCS->Write((byte)ST->UseMaxi()); if (ST->UseMaxi()) JCS->Write(ST->Maxi());
-					for (auto m : *ST->ListModifiers()) {
-						JCS->WriteByte(6);
-						JCS->Write(m);
-						JCS->Write((*ST)[m]);
+						JCS->WriteByte(4); JCS->Write((byte)ST->UseMini()); if (ST->UseMini()) JCS->Write(ST->Mini());
+						JCS->WriteByte(5); JCS->Write((byte)ST->UseMaxi()); if (ST->UseMaxi()) JCS->Write(ST->Maxi());
+						auto modifiers{ ST->ListModifiers() };
+						for (auto m : *modifiers) {
+							JCS->WriteByte(6);
+							JCS->Write(m);
+							JCS->Write((*ST)[m]);
+						}
+						if (ST->StatScriptFunction) JCS->WriteByte(7); // Can cause a safety error *if* you configured the loader for that!
+						JCS->WriteByte(8); JCS->Write(ST->StatScriptScript);
+						JCS->WriteByte(0);
 					}
 				}
 
