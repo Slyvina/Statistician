@@ -59,12 +59,18 @@ namespace Slyvina {
 						Stat StD{ nullptr };
 						while (GetB(BT, STag)) {
 							//printf("DEBUG> Stat tag: %d @%x\n", STag, (int)BT->Position() - 1);
+							//std::cout << "Char:" << ChT << "; Pos:" << BT->Position()<<"/"<<TrSPrintF("%x",BT->Position()) << " >> " << (int)STag << " STID : " << STID << std::endl;
 							switch (STag) {
 							case 0:
 								// Should never happen, but just in case!
 								throw std::runtime_error("Statistic internal error! Stat-Null-Tag! Please report!");
 							case 1:
 								STID = BT->ReadString();
+								if (STID == "") {
+									std::cout << "\7WARNING!!!! Empty string received as statistic data! File possibly corrupted. Trying to void this!\n";
+									static size_t errcount{0};
+									STID = TrSPrintF("*ERROR*%d*", errcount++);
+								}
 								StD = ChD->Statistic(STID);
 								break;
 							case 2:
