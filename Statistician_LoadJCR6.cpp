@@ -1,7 +1,7 @@
 // Lic:
 // Statistician/Statistician_LoadJCR6.cpp
 // Statician - Load from JCR6
-// version: 23.08.01
+// version: 23.11.21
 // Copyright (C) 2023 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
