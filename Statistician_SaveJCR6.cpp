@@ -44,9 +44,12 @@ namespace Slyvina {
 				auto IS{ CH->StatList() };
 				for (auto STID : *IS) {
 					auto ST{ CH->Statistic(STID) };
-					JCS->WriteByte(2);
-					JCS->WriteByte(1); JCS->Write(STID);
-					JCS->WriteByte(2); JCS->Write(ST->Base);
+					if (Prefixed(STID, "*ERROR*") || STID=="") {
+						std::cout << "\7WARNING! Error tag or emtpy tag for stat encountered. Ignoreing for save!\n";
+					} else {
+						JCS->WriteByte(2);
+						JCS->WriteByte(1); JCS->Write(STID);
+						JCS->WriteByte(2); JCS->Write(ST->Base);
 
 					JCS->WriteByte(4); JCS->Write((byte)ST->UseMini()); if (ST->UseMini()) JCS->Write(ST->Mini());
 					JCS->WriteByte(5); JCS->Write((byte)ST->UseMaxi()); if (ST->UseMaxi()) JCS->Write(ST->Maxi());
@@ -55,9 +58,6 @@ namespace Slyvina {
 						JCS->Write(m);
 						JCS->Write((*ST)[m]);
 					}
-					if (ST->StatScriptFunction) JCS->WriteByte(7); // Can cause a safety error *if* you configured the loader for that!
-					JCS->WriteByte(8); JCS->Write(ST->StatScriptScript);
-					JCS->WriteByte(0);
 				}
 
 				// Data
