@@ -1,7 +1,7 @@
 // Lic:
 // Statistician/Statistician.cpp
 // Statistician
-// version: 23.11.01
+// version: 23.12.24
 // Copyright (C) 2023 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -334,7 +334,7 @@ namespace Slyvina {
 			bool first{ true };
 			vector<string> Temp{};
 			for (auto _it : _Lijst) {
-				if (!(_it == item && (all || first))) {
+				if ((_it == item && (all || first))) {
 					first = false;
 				} else Temp.push_back(_it);
 			}
