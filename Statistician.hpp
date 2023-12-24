@@ -1,7 +1,7 @@
 // Lic:
 // Statistician/Statistician.hpp
 // Statistician (header)
-// version: 23.09.26
+// version: 23.12.24
 // Copyright (C) 2023 Jeroen P. Broks
 // This software is provided 'as-is', without any express or implied
 // warranty.  In no event will the authors be held liable for any damages
@@ -235,11 +235,14 @@ namespace Slyvina {
 			inline uint64 ID() { return _id; }
 			inline _List(_Char* Ouwe) { Parent = Ouwe; }
 			inline void operator+=(std::string v) { _Lijst.push_back(v); }
+			inline void sort() { SortVector(&_Lijst); }
 			inline std::vector<std::string>* GetList() { return &_Lijst; }
 			std::string& Spot(size_t i);
 			inline std::string& operator[](size_t i) { return Spot(i); }
 			void Remove(std::string item, bool all = false);
 			void Remove(size_t idx);
+			inline void operator-=(std::string v) { Remove(v); }
+			inline void operator-=(size_t idx) { Remove(idx); }
 		};
 
 		inline Party CreateParty() { return std::shared_ptr<_Party>(new _Party()); }
