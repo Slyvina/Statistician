@@ -1,3 +1,26 @@
+// License:
+// 	Statistician/Statistician.cpp
+// 	Statistician
+// 	version: 25.01.13
+// 
+// 	Copyright (C) 2023, 2025 Jeroen P. Broks
+// 
+// 	This software is provided 'as-is', without any express or implied
+// 	warranty.  In no event will the authors be held liable for any damages
+// 	arising from the use of this software.
+// 
+// 	Permission is granted to anyone to use this software for any purpose,
+// 	including commercial applications, and to alter it and redistribute it
+// 	freely, subject to the following restrictions:
+// 
+// 	1. The origin of this software must not be misrepresented; you must not
+// 	   claim that you wrote the original software. If you use this software
+// 	   in a product, an acknowledgment in the product documentation would be
+// 	   appreciated but is not required.
+// 	2. Altered source versions must be plainly marked as such, and must not be
+// 	   misrepresented as being the original software.
+// 	3. This notice may not be removed or altered from any source distribution.
+// End License
 // Lic:
 // Statistician/Statistician.cpp
 // Statistician
@@ -159,7 +182,15 @@ namespace Slyvina {
 			return Modifiers[modid];
 		}
 		int64 _Stat::Total() {
-			if (StatScriptFunction) StatScriptFunction(this, StatScriptScript);
+		    Chat("Stat - Total - Asked");
+			if (StatScriptFunction) {
+                    Chat("Stat - Total - Function");
+                    StatScriptFunction(this, StatScriptScript);
+			}
+			#ifdef STAT_DEBUG
+			else Chat("Stat - Total - NoFunction");
+			#endif // STAT_DEBUG
+
 			auto ret{ Base };
 			for (auto& k : Modifiers) {
 				ret += k.second;
@@ -192,9 +223,13 @@ namespace Slyvina {
 			}
 			return _Stats[sid];
 		}
-		int64 _Char::Stats(std::string sid) { return Statistic(sid)->Total(); }
+		int64 _Char::Stats(std::string sid) {
+		    if (this==nullptr) printf("\007\x1b[91m<NULL>.Stats(\"%s\")!!!\x1b[0m\n",sid.c_str());
+		    return Statistic(sid)->Total();
+        }
 		int64 _Char::Stats(std::string sid, std::string modifier) {
 			Trans2Upper(modifier);
+			if (this==nullptr) printf("\007\x1b[91m<NULL>.Stats(\"%s\",\"%s\")!!!\x1b[0m\n",sid.c_str(),modifier.c_str());
 			if (modifier == "BASE")  return Statistic(sid)->Base;
 			return (*Statistic(sid))[modifier];
 		}
@@ -300,7 +335,7 @@ namespace Slyvina {
 		}
 
 		void _Char::LinkData(std::string sourceData, std::string targetchar, std::string targetData) {
-			auto src{ this };
+			//auto src{ this };
 			auto tgt{ Parent->Ch(targetchar) };
 			//Trans2Upper(sourceData);
 			Trans2Upper(targetData);
