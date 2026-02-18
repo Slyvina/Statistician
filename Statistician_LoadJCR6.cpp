@@ -1,3 +1,26 @@
+// License:
+// 	Statistician/Statistician_LoadJCR6.cpp
+// 	Statician - Load from JCR6
+// 	version: 25.01.29
+// 
+// 	Copyright (C) 2023, 2025 Jeroen P. Broks
+// 
+// 	This software is provided 'as-is', without any express or implied
+// 	warranty.  In no event will the authors be held liable for any damages
+// 	arising from the use of this software.
+// 
+// 	Permission is granted to anyone to use this software for any purpose,
+// 	including commercial applications, and to alter it and redistribute it
+// 	freely, subject to the following restrictions:
+// 
+// 	1. The origin of this software must not be misrepresented; you must not
+// 	   claim that you wrote the original software. If you use this software
+// 	   in a product, an acknowledgment in the product documentation would be
+// 	   appreciated but is not required.
+// 	2. Altered source versions must be plainly marked as such, and must not be
+// 	   misrepresented as being the original software.
+// 	3. This notice may not be removed or altered from any source distribution.
+// End License
 // Lic:
 // Statistician/Statistician_LoadJCR6.cpp
 // Statician - Load from JCR6
@@ -22,15 +45,19 @@
 
 #define SCHK(nid,what) if (!nid.size()) throw std::runtime_error(TrSPrintF("Data for %s, but no id has been set! Statician data could be corrupted!",what))
 
+//{ namespace using
 using namespace Slyvina;
 using namespace Units;
 using namespace JCR6;
+//}
+
 
 namespace Slyvina {
 	namespace Statistician {
 
 		JCR6_Response StatFunctionResponse{ JCR6_Response::Ignore };
 
+//{ Read Loader
 #pragma region "Read Loader"
 		inline byte GetB(Bank Bnk, byte& b) { b = Bnk->ReadByte(b); return b; }
 
@@ -44,7 +71,18 @@ namespace Slyvina {
 				auto BT{ J->B(ChF) };
 				auto ChD{ P->NewChar(ChT) };
 				byte MTag{ 0xff };
-				if (BT->ReadByte() != 8) throw std::runtime_error("Only 6bit command tags supported in character stat data");
+				auto cbit{BT->ReadByte()};
+				if ( cbit != 8) {
+                        std::cout
+                            << "Bit error "
+                            <<TrSPrintF("%02d/%02x",cbit,cbit)
+                            << "; on char "
+                            << ChT
+                            << " in entry "
+                            << ChF
+                            << std::endl;
+                        throw std::runtime_error(TrSPrintF("Only 8bit command tags supported in character stat data (%d)",cbit));
+				}
 				while (GetB(BT, MTag)) {
 					switch (MTag) {
 					case 0: goto ChEindLoop; // Should NEVER happen, but just in case!
@@ -164,7 +202,7 @@ namespace Slyvina {
 						throw std::runtime_error(TrSPrintF("Unknown main command tag for character %s (%d). Either the character data is corrupted or you loaded a file for a later version of Statician.",ChT.c_str(),MTag));
 					}
 				} ChEindLoop:;
-				
+
 			}
 			// Party (should be after loading characters to prevent conflicts)
 			auto BT = J->B(dir + "Party");
@@ -175,10 +213,29 @@ namespace Slyvina {
 			}
 
 
-			// TODO: Load links and apply them
+			// Load links and apply them
+			BT = J->B(dir+"Link");
+			Byte Tag{0};
+			while (BT->ReadByte(Tag)) {
+                String
+                    src{BT->ReadString()}, // SouRCe character
+                    sky{BT->ReadString()}, // Source KeY
+                    tgt{BT->ReadString()}, // TarGeT character
+                    tky{BT->ReadString()}; // Target KeY
+                switch(Tag) {
+                    case 0: break; // Should NOT be possible, but hey, ya never know!
+                    case 1: P->Ch(src)->LinkStat(sky,tgt,tky); break;
+                    case 2: P->Ch(src)->LinkPoints(sky,tgt,tky); break;
+                    case 3: P->Ch(src)->LinkList(sky,tgt,tky); break;
+                    case 4: P->Ch(src)->LinkData(sky,tgt,tky); break;
+                    default: throw std::runtime_error(TrSPrintF("Unknown link command (%d)",Tag));
+                }
+			}
 		}
 #pragma endregion
+//}
 
+//{ Chain link functions
 #pragma region "Chain link functions"
 		Party JCR6_LoadParty(JCR6::JT_Dir J, std::string dir) {
 			auto ret{ new _Party() };
@@ -207,6 +264,6 @@ namespace Slyvina {
 		}
 
 #pragma endregion
-
+//}
 	}
 }

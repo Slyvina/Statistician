@@ -1,9 +1,9 @@
 // License:
 // 	Statistician/Statistician_SaveJCR6.cpp
 // 	Statistician - Save to JCR6
-// 	version: 24.10.31
+// 	version: 25.01.29
 // 
-// 	Copyright (C) 2023, 2024 Jeroen P. Broks
+// 	Copyright (C) 2023, 2024, 2025 Jeroen P. Broks
 // 
 // 	This software is provided 'as-is', without any express or implied
 // 	warranty.  In no event will the authors be held liable for any damages
@@ -41,6 +41,7 @@ namespace Slyvina {
 			JCS->WriteUInt32(P->Size());
 			for (uint32 i = 0; i < P->Size(); i++) JCS->Write((*P)[i]);
 			auto CL{ P->CharList() };
+			JCS->Close();
 			for (auto CHID : *CL) {
 				auto CH = (*P)[CHID];
 				SSSJNE("Characters/" + CHID);
@@ -52,7 +53,7 @@ namespace Slyvina {
 				for (auto STID : *IS) {
 					auto ST{ CH->Statistic(STID) };
 					if (Prefixed(STID, "*ERROR*") || STID=="") {
-						std::cout << "\7WARNING! Error tag or emtpy tag for stat encountered. Ignoreing for save!\n";
+						std::cout << "\7WARNING! Error tag or empty tag for stat encountered. Ignoring for save!\n";
 					} else {
 						JCS->WriteByte(2);
 						JCS->WriteByte(1); JCS->Write(STID);
@@ -90,6 +91,7 @@ namespace Slyvina {
 					for (auto& E : L) JCS->Write(E);
 				}
 
+
 				// Points
 				IS = CH->PointsList();
 				for (auto PTID : *IS) {
@@ -105,9 +107,103 @@ namespace Slyvina {
 				}
 
 				JCS->WriteByte(0);
+                JCS->Close();
 			}
+			//JCS->Close();
 			SSSJNE("Link");
-			JCS->WriteByte(0); // TODO: Link detection and saving
+			//std::map<String,bool> Geweest{};
+			// Link Statistics
+			for (auto CHID1 : *CL) {
+				auto CH1 = (*P)[CHID1];
+				for (auto CHID2:*CL) { //if (CHID1!=CHID2) {
+				    auto CH2{(*P)[CHID2]};
+				    auto IS1 = CH1->StatList();
+				    auto IS2 = CH2->StatList();
+                    for(auto STID1:*IS1) {
+                        auto ST1{CH1->Statistic(STID1).get()};
+                        for(auto STID2:*IS2) {
+                            auto ST2{CH2->Statistic(STID2).get()};
+                            if(ST1==ST2 && CHID1!=CHID2) {
+                                JCS->WriteByte(1);
+                                JCS->Write(CHID1);
+                                JCS->Write(STID1);
+                                JCS->Write(CHID2);
+                                JCS->Write(STID2);
+                            }
+                        }
+                    }
+				}
+			}
+			// Link Points
+			for (auto CHID1 : *CL) {
+				auto CH1 = (*P)[CHID1];
+				for (auto CHID2:*CL) { //if (CHID1!=CHID2) {
+				    auto CH2{(*P)[CHID2]};
+				    auto IS1 = CH1->PointsList();
+				    auto IS2 = CH2->PointsList();
+                    for(auto STID1:*IS1) {
+                        auto ST1{CH1->GetPoints(STID1).get()};
+                        for(auto STID2:*IS2) {
+                            auto ST2{CH2->GetPoints(STID2).get()};
+                            if(ST1==ST2 && CHID1!=CHID2) {
+                                JCS->WriteByte(2);
+                                JCS->Write(CHID1);
+                                JCS->Write(STID1);
+                                JCS->Write(CHID2);
+                                JCS->Write(STID2);
+                            }
+                        }
+                    }
+				}
+			}
+            // Link Lists
+			for (auto CHID1 : *CL) {
+				auto CH1 = (*P)[CHID1];
+				for (auto CHID2:*CL) { //if (CHID1!=CHID2) {
+				    auto CH2{(*P)[CHID2]};
+				    auto IS1 = CH1->ListList();
+				    auto IS2 = CH2->ListList();
+                    for(auto STID1:*IS1) {
+                        auto ST1{CH1->GetList(STID1).get()};
+                        for(auto STID2:*IS2) {
+                            auto ST2{CH2->GetList(STID2).get()};
+                            if(ST1==ST2 && CHID1!=CHID2) {
+                                JCS->WriteByte(3);
+                                JCS->Write(CHID1);
+                                JCS->Write(STID1);
+                                JCS->Write(CHID2);
+                                JCS->Write(STID2);
+                            }
+                        }
+                    }
+				}
+			}
+
+			// Link Data
+			for (auto CHID1 : *CL) {
+				auto CH1 = (*P)[CHID1];
+				for (auto CHID2:*CL) { //if (CHID1!=CHID2) {
+				    auto CH2{(*P)[CHID2]};
+				    auto IS1 = CH1->DataList();
+				    auto IS2 = CH2->DataList();
+                    for(auto STID1:*IS1) {
+                        auto ST1{CH1->GetData(STID1).get()};
+                        for(auto STID2:*IS2) {
+                            auto ST2{CH2->GetData(STID2).get()};
+                            if(ST1==ST2 && CHID1!=CHID2) {
+                                JCS->WriteByte(4);
+                                JCS->Write(CHID1);
+                                JCS->Write(STID1);
+                                JCS->Write(CHID2);
+                                JCS->Write(STID2);
+                            }
+                        }
+                    }
+				}
+			}
+
+			JCS->WriteByte(0);
+			JCS->Close();
 			if (asblock) Block->Close();
 		}
 

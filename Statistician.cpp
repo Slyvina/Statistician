@@ -1,7 +1,7 @@
 // License:
 // 	Statistician/Statistician.cpp
 // 	Statistician
-// 	version: 25.01.13
+// 	version: 25.03.01
 // 
 // 	Copyright (C) 2023, 2025 Jeroen P. Broks
 // 
@@ -21,25 +21,6 @@
 // 	   misrepresented as being the original software.
 // 	3. This notice may not be removed or altered from any source distribution.
 // End License
-// Lic:
-// Statistician/Statistician.cpp
-// Statistician
-// version: 23.12.24
-// Copyright (C) 2023 Jeroen P. Broks
-// This software is provided 'as-is', without any express or implied
-// warranty.  In no event will the authors be held liable for any damages
-// arising from the use of this software.
-// Permission is granted to anyone to use this software for any purpose,
-// including commercial applications, and to alter it and redistribute it
-// freely, subject to the following restrictions:
-// 1. The origin of this software must not be misrepresented; you must not
-// claim that you wrote the original software. If you use this software
-// in a product, an acknowledgment in the product documentation would be
-// appreciated but is not required.
-// 2. Altered source versions must be plainly marked as such, and must not be
-// misrepresented as being the original software.
-// 3. This notice may not be removed or altered from any source distribution.
-// EndLic
 
 #include <SlyvString.hpp>
 
@@ -171,7 +152,14 @@ namespace Slyvina {
 			if (!_Characters.count(ch)) return;
 			Remove(ch, false); // 2nd MUST always be false or an infinite loop WILL form freezing the program!
 			_Characters.erase(ch);
+
 		}
+
+		bool _Party::HasChar(std::string ch) {
+		    std::transform(ch.begin(), ch.end(), ch.begin(), ::toupper);
+		    //for (auto&debug:_Characters) std::cout << "Has: "<<debug.first<<"; Wants: "<<ch<<"\n"; // debug hash!
+		    return _Characters.count(ch);
+        }
 		Slyvina::VecString _Party::CharList() {
 			auto ret{ NewVecString() };
 			for (auto& ICH : _Characters) ret->push_back(ICH.first);
@@ -246,8 +234,18 @@ namespace Slyvina {
 			//Trans2Upper(sourcestat);
 			Trans2Upper(targetstat);
 			tgt->_Stats[targetstat] = Statistic(sourcestat);
+			//printf("Stat %s linked to %s as %s -> %d\n",sourcestat.c_str(),targetchar.c_str(),targetstat.c_str(),tgt->_Stats[targetstat]->Total());
 		}
-		void _Char::LinkStat(std::string sourcestat, std::string targetchar) { LinkStat(sourcestat, targetchar, sourcestat); }
+		void _Char::LinkStat(std::string sourcestat, std::string targetchar) {
+		    if (sourcestat=="*") {
+                //auto tgt{ Parent->Ch(targetchar) };
+                std::vector<String> Keys {};
+                for(auto k:_Stats) Keys.push_back(k.first);
+                for(auto k:Keys) LinkStat(k,targetchar,k);
+                return;
+		    }
+		    LinkStat(sourcestat, targetchar, sourcestat);
+        }
 		void _Char::KillStat(std::string stat) {
 			Trans2Upper(stat);
 			if (_Stats.count(stat)) _Stats.erase(stat);
@@ -288,12 +286,22 @@ namespace Slyvina {
 			auto src{ this };
 			auto tgt{ Parent->Ch(targetchar) };
 			auto pnt{ GetPoints(sourcestat) };
-			_Points[targetstat] = pnt;
+			tgt->_Points[targetstat] = pnt;
 			if (pnt->MaxCopy.size()) LinkStat(pnt->MaxCopy, targetchar);
 			if (pnt->MinCopy.size()) LinkStat(pnt->MinCopy, targetchar);
 		}
 
-		void _Char::LinkPoints(std::string sourcestat, std::string targetchar) { LinkPoints(sourcestat, targetchar, sourcestat); }
+		void _Char::LinkPoints(std::string sourcestat, std::string targetchar) {
+		    if (sourcestat=="*") {
+                //auto tgt{ Parent->Ch(targetchar) };
+                std::vector<String> Keys {};
+                for(auto k:_Points) Keys.push_back(k.first);
+                for(auto k:Keys) LinkPoints(k,targetchar,k);
+                return;
+		    }
+
+		    LinkPoints(sourcestat, targetchar, sourcestat);
+        }
 
 		VecString _Char::PointsList() {
 			auto ret{ NewVecString() };
@@ -341,7 +349,16 @@ namespace Slyvina {
 			Trans2Upper(targetData);
 			tgt->_DataMap[targetData] = GetData(sourceData);
 		}
-		void _Char::LinkData(std::string sourceData, std::string targetchar) { LinkData(sourceData, targetchar, sourceData); }
+		void _Char::LinkData(std::string sourceData, std::string targetchar) {
+		     if (sourceData=="*") {
+                //auto tgt{ Parent->Ch(targetchar) };
+                std::vector<String> Keys {};
+                for(auto k:_DataMap) Keys.push_back(k.first);
+                for(auto k:Keys) LinkData(k,targetchar,k);
+                return;
+		    }
+		    LinkData(sourceData, targetchar, sourceData);
+        }
 
 		VecString _Char::DataList() {
 			auto ret{ NewVecString() };
@@ -388,9 +405,20 @@ namespace Slyvina {
 			//Trans2Upper(sourceLijst);
 			Trans2Upper(targetLijst);
 			tgt->_Lijsten[targetLijst] = GetList(sourceLijst);
+			//std::cout << "Link list: "<<targetLijst<< " to: "<<targetchar<<"\n";
 		}
 
-		void _Char::LinkList(std::string sourceLijst, std::string targetchar) { LinkList(sourceLijst, targetchar, sourceLijst); }
+		void _Char::LinkList(std::string sourceLijst, std::string targetchar) {
+		      if (sourceLijst=="*") {
+				//std::cout << "Should link ALL lists to: "<<targetchar<<"\n";
+                //auto tgt{ Parent->Ch(targetchar) };
+                std::vector<String> Keys {};
+                for(auto k:_Lijsten) Keys.push_back(k.first);
+                for(auto k:Keys) LinkList(k,targetchar,k);
+                return;
+		    }
+		    LinkList(sourceLijst, targetchar, sourceLijst);
+        }
 
 		VecString _Char::ListList() {
 			auto ret{ NewVecString() };
@@ -407,5 +435,28 @@ namespace Slyvina {
 			return Parent->Statistic(key)->Base;
 		}
 
-}
+		//{ Debug
+
+		#define ShowLinks(StatList,Statistic,Name) {\
+			auto l1{ch1.second->StatList()};\
+			auto l2{ch2.second->StatList()};\
+			for(auto& chk1:*l1) for (auto&chk2:*l2) { \
+				if ((ch1.first!=ch2.first || chk1!=chk2) && ch1.second->Statistic(chk1).get()==ch2.second->Statistic(chk2).get()) std::cout << "\x1b[92mLinked "<<Name<<": \x1b[93m" << ch1.first << "::"<< chk1<< " \x1b[94m -> \x1b[95m" <<ch2.first<<"::"<<chk2<< "\x1b[0m\n";\
+			}\
+		}
+
+		void _Party::LinkOverview() {
+			std::map<String,bool> Done{};
+			for (auto&ch1:_Characters) {
+				for (auto&ch2:_Characters) if (!Done.count(ch2.first)) {
+					ShowLinks(StatList,Statistic,"Statistic");
+					ShowLinks(PointsList,GetPoints,"Points");
+					ShowLinks(DataList,GetData,"Data");
+					ShowLinks(ListList,GetList,"List");
+				}
+				Done[ch1.first]=true;
+			}
+		}
+		//}
+	}
 }
